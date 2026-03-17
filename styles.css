@@ -47,6 +47,46 @@ body {
     gap: 1rem;
 }
 
+.dashboard-kpis {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+.stats-section {
+    display: flex;
+    flex-direction: column;
+    gap: 0.8rem;
+}
+
+.stats-section-title {
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--secondary);
+    margin: 0;
+}
+
+.stats-grid-docs,
+.stats-grid-values {
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+}
+
+.stat-help {
+    display: block;
+    font-size: 0.8rem;
+    color: var(--secondary);
+    margin-top: 0.2rem;
+}
+
+.stat-card-money .stat-value {
+    color: var(--primary);
+}
+
+.stat-card-success .stat-value {
+    color: var(--success);
+}
+
 .brand h1 {
     font-size: 1.8rem;
     color: var(--primary);
