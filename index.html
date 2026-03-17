@@ -160,36 +160,74 @@
                 </div>
             </div>
 
-            <div class="stats-grid">
-                <div class="stat-card">
-                    <div class="stat-icon">📄</div>
-                    <div class="stat-content">
-                        <span class="stat-value" id="stat-total">0</span>
-                        <span class="stat-label">Total Documentos</span>
-                    </div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-icon">📋</div>
-                    <div class="stat-content">
-                        <span class="stat-value" id="stat-orcamentos">0</span>
-                        <span class="stat-label">Orçamentos</span>
-                    </div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-icon">🧾</div>
-                    <div class="stat-content">
-                        <span class="stat-value" id="stat-recibos">0</span>
-                        <span class="stat-label">Recibos</span>
-                    </div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-icon">💰</div>
-                    <div class="stat-content">
-                        <span class="stat-value" id="stat-total-value">R$ 0,00</span>
-                        <span class="stat-label">Valor Total</span>
-                    </div>
+            <div class="dashboard-kpis">
+    <div class="stats-section">
+        <h3 class="stats-section-title">Documentos</h3>
+        <div class="stats-grid stats-grid-docs">
+            <div class="stat-card">
+                <div class="stat-icon">📄</div>
+                <div class="stat-content">
+                    <span class="stat-value" id="stat-total-grouped">0</span>
+                    <span class="stat-label">Documentos únicos</span>
+                    <span class="stat-help">Agrupados por ID</span>
                 </div>
             </div>
+
+            <div class="stat-card">
+                <div class="stat-icon">📋</div>
+                <div class="stat-content">
+                    <span class="stat-value" id="stat-orcamentos">0</span>
+                    <span class="stat-label">Orçamentos</span>
+                </div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-icon">🧾</div>
+                <div class="stat-content">
+                    <span class="stat-value" id="stat-recibos">0</span>
+                    <span class="stat-label">Recibos</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="stats-section">
+        <h3 class="stats-section-title">Valores</h3>
+        <div class="stats-grid stats-grid-values">
+            <div class="stat-card stat-card-money">
+                <div class="stat-icon">📋</div>
+                <div class="stat-content">
+                    <span class="stat-value" id="stat-value-orcamentos">R$ 0,00</span>
+                    <span class="stat-label">Valor em Orçamentos</span>
+                </div>
+            </div>
+
+            <div class="stat-card stat-card-money">
+                <div class="stat-icon">🧾</div>
+                <div class="stat-content">
+                    <span class="stat-value" id="stat-value-recibos">R$ 0,00</span>
+                    <span class="stat-label">Valor em Recibos</span>
+                </div>
+            </div>
+
+            <div class="stat-card stat-card-success">
+                <div class="stat-icon">💰</div>
+                <div class="stat-content">
+                    <span class="stat-value" id="stat-value-faturado">R$ 0,00</span>
+                    <span class="stat-label">Valor Faturado</span>
+                </div>
+            </div>
+
+            <div class="stat-card stat-card-success">
+                <div class="stat-icon">💚</div>
+                <div class="stat-content">
+                    <span class="stat-value" id="stat-value-pago">R$ 0,00</span>
+                    <span class="stat-label">Valor Pago</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
 
             <div class="filters-section">
                 <div class="filter-group">
