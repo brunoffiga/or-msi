@@ -237,24 +237,43 @@ function clearForm() {
 async function loadDashboard(filters = {}) {
     try {
         showLoading(true);
-        
-        // 1. Buscar e filtrar os documentos
+
         const filteredDocs = await getFilteredDocuments(filters);
-        
-        // 2. Calcular estatísticas com base nos dados FILTRADOS
+
+        // Agrupar por ID para a contagem principal
+        const grouped = {};
+        filteredDocs.forEach(doc => {
+            if (!grouped[doc.id]) grouped[doc.id] = [];
+            grouped[doc.id].push(doc);
+        });
+
+        const groupedEntries = Object.values(grouped);
+
         const orcamentos = filteredDocs.filter(d => d.type === 'orcamento');
         const recibos = filteredDocs.filter(d => d.type === 'recibo');
-        const totalValue = filteredDocs.reduce((sum, doc) => sum + (parseFloat(doc.total) || 0), 0);
-        
-        // 3. Atualizar os cards de estatísticas
-        document.getElementById('stat-total').textContent = filteredDocs.length;
+
+        const valorOrcamentos = orcamentos.reduce((sum, doc) => sum + (parseFloat(doc.total) || 0), 0);
+        const valorRecibos = recibos.reduce((sum, doc) => sum + (parseFloat(doc.total) || 0), 0);
+
+        const faturados = recibos.filter(d => d.status === 'Faturado' || d.status === 'Pago');
+        const pagos = recibos.filter(d => d.status === 'Pago');
+
+        const valorFaturado = faturados.reduce((sum, doc) => sum + (parseFloat(doc.total) || 0), 0);
+        const valorPago = pagos.reduce((sum, doc) => sum + (parseFloat(doc.total) || 0), 0);
+
+        // KPIs de contagem
+        document.getElementById('stat-total-grouped').textContent = groupedEntries.length;
         document.getElementById('stat-orcamentos').textContent = orcamentos.length;
         document.getElementById('stat-recibos').textContent = recibos.length;
-        document.getElementById('stat-total-value').textContent = Utils.formatMoney(totalValue);
-        
-        // 4. Renderizar a tabela com os mesmos dados filtrados
+
+        // KPIs de valor
+        document.getElementById('stat-value-orcamentos').textContent = Utils.formatMoney(valorOrcamentos);
+        document.getElementById('stat-value-recibos').textContent = Utils.formatMoney(valorRecibos);
+        document.getElementById('stat-value-faturado').textContent = Utils.formatMoney(valorFaturado);
+        document.getElementById('stat-value-pago').textContent = Utils.formatMoney(valorPago);
+
         renderDocumentsTable(filteredDocs);
-        
+
     } catch (error) {
         console.error('Erro ao carregar dashboard:', error);
         showToast('Erro ao carregar dados', 'error');
