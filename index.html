@@ -5,24 +5,25 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>MSI - Sistema de Orçamentos e Recibos</title>
     <link rel="stylesheet" href="styles.css">
-
+    
     <!-- Supabase Client -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-
+    
     <!-- PDF e DOCX -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <script src="https://unpkg.com/docx@7.8.2/build/index.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
-
+    
     <style>
+        /* Estilos para notificações toast */
         .toast-container {
             position: fixed;
             top: 20px;
             right: 20px;
             z-index: 9999;
         }
-
+        
         .toast {
             min-width: 250px;
             padding: 16px 24px;
@@ -36,38 +37,38 @@
             background: white;
             border-left: 4px solid;
         }
-
+        
         .toast.success {
             border-color: #10b981;
         }
-
+        
         .toast.error {
             border-color: #ef4444;
         }
-
+        
         .toast.warning {
             border-color: #f59e0b;
         }
-
+        
         .toast.info {
             border-color: #06b6d4;
         }
-
+        
         .toast-icon {
             font-size: 1.2rem;
         }
-
+        
         .toast-message {
             flex: 1;
             color: #1e293b;
         }
-
+        
         .toast-close {
             cursor: pointer;
             color: #64748b;
             font-size: 1.2rem;
         }
-
+        
         @keyframes slideIn {
             from {
                 transform: translateX(100%);
@@ -78,7 +79,8 @@
                 opacity: 1;
             }
         }
-
+        
+        /* Loading spinner */
         .loading-overlay {
             position: fixed;
             top: 0;
@@ -91,15 +93,15 @@
             justify-content: center;
             z-index: 9998;
         }
-
+        
         .loading-overlay.active {
             display: flex;
         }
-
+        
         .loading-content {
             text-align: center;
         }
-
+        
         .loading-spinner {
             width: 50px;
             height: 50px;
@@ -109,11 +111,11 @@
             animation: spin 0.8s ease infinite;
             margin: 0 auto 20px;
         }
-
+        
         @keyframes spin {
             to { transform: rotate(360deg); }
         }
-
+        
         .loading-text {
             color: #64748b;
             font-size: 1.1rem;
@@ -121,8 +123,10 @@
     </style>
 </head>
 <body>
+    <!-- Container de Notificações -->
     <div class="toast-container" id="toast-container"></div>
-
+    
+    <!-- Loading Overlay -->
     <div class="loading-overlay" id="loading-overlay">
         <div class="loading-content">
             <div class="loading-spinner"></div>
@@ -133,59 +137,71 @@
     <header class="app-header">
         <div class="header-content">
             <div class="brand">
-                <a href="#dashboard" onclick="goToDashboard()">
-                    <img src="header.png" alt="MSI Logo">
+                <a href="#dashboard" onclick="goToDashboard()" style="cursor: pointer; text-decoration: none;">
+                    <img src="header.png" alt="MSI Logo" style="height: 70px; margin-right: 10px;">
                 </a>
             </div>
-
             <nav class="main-nav">
-                <button class="nav-btn" data-view="create">Documentos</button>
-                <button class="nav-btn" data-view="products">Serviços</button>
-                <button class="nav-btn" data-view="clients">Clientes</button>
-                <button class="nav-btn" data-view="settings">Configurações</button>
+                <button class="nav-btn" data-view="create">➕ Documento</button>
+                <button class="nav-btn" data-view="products">🛠️ Serviços</button>
+                <button class="nav-btn" data-view="clients">🏢 Clientes</button>
+                <button class="nav-btn" data-view="settings">⚙️</button>
             </nav>
         </div>
     </header>
 
     <main class="app-container">
+        
         <section id="dashboard-view" class="view-section active">
             <div class="view-header">
-                <h2>Dashboard</h2>
+                <h2>📊 Dashboard</h2>
                 <div class="header-actions">
-                    <button class="btn-export" onclick="exportBackup()">Exportar backup</button>
+                    <button class="btn-export" onclick="exportBackup()">💾</button>
                 </div>
             </div>
 
-            <div class="stats-grid stats-grid-compact">
-                <div class="stat-card stat-card-kpi">
-                    <div class="stat-header">
-                        <span class="stat-label">Orçamentos</span>
-                        <span class="stat-count" id="stat-orcamentos-count">0 documentos</span>
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-icon">📄</div>
+                    <div class="stat-content">
+                        <span class="stat-value" id="stat-total">0</span>
+                        <span class="stat-label">Total Documentos</span>
                     </div>
-                    <div class="stat-value" id="stat-orcamentos-value">R$ 0,00</div>
                 </div>
-
-                <div class="stat-card stat-card-kpi">
-                    <div class="stat-header">
-                        <span class="stat-label">Recibos</span>
-                        <span class="stat-count" id="stat-recibos-count">0 documentos</span>
+                <div class="stat-card">
+                    <div class="stat-icon">📋</div>
+                    <div class="stat-content">
+                        <span class="stat-value" id="stat-orcamentos">0</span>
+                        <span class="stat-label">Orçamentos</span>
                     </div>
-                    <div class="stat-value" id="stat-recibos-value">R$ 0,00</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon">🧾</div>
+                    <div class="stat-content">
+                        <span class="stat-value" id="stat-recibos">0</span>
+                        <span class="stat-label">Recibos</span>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon">💰</div>
+                    <div class="stat-content">
+                        <span class="stat-value" id="stat-total-value">R$ 0,00</span>
+                        <span class="stat-label">Valor Total</span>
+                    </div>
                 </div>
             </div>
 
             <div class="filters-section">
                 <div class="filter-group">
-                    <label>Tipo</label>
+                    <label>Tipo:</label>
                     <select id="filter-type">
                         <option value="">Todos</option>
                         <option value="orcamento">Orçamento</option>
                         <option value="recibo">Recibo</option>
                     </select>
                 </div>
-
                 <div class="filter-group">
-                    <label>Status</label>
+                    <label>Status:</label>
                     <select id="filter-status">
                         <option value="">Todos</option>
                         <option value="Aguardando">Aguardando</option>
@@ -197,23 +213,19 @@
                         <option value="Cancelado">Cancelado</option>
                     </select>
                 </div>
-
                 <div class="filter-group">
-                    <label>Data Início</label>
+                    <label>Data Início:</label>
                     <input type="date" id="filter-date-start">
                 </div>
-
                 <div class="filter-group">
-                    <label>Data Fim</label>
+                    <label>Data Fim:</label>
                     <input type="date" id="filter-date-end">
                 </div>
-
                 <div class="filter-group">
-                    <label>Buscar</label>
+                    <label>Buscar:</label>
                     <input type="text" id="filter-search" placeholder="Cliente, ID...">
                 </div>
-
-                <button class="btn-secondary" onclick="clearFilters()">Limpar</button>
+                <button class="btn-secondary" onclick="clearFilters()">🔄 Limpar</button>
             </div>
 
             <div class="documents-table-container">
@@ -229,35 +241,36 @@
                             <th>Status</th>
                         </tr>
                     </thead>
-                    <tbody id="documents-table-body"></tbody>
+                    <tbody id="documents-table-body">
+                    </tbody>
                 </table>
             </div>
         </section>
 
         <section id="create-view" class="view-section">
             <div class="view-header">
-                <h2>Novo Documento</h2>
+                <h2>➕ Novo Documento</h2>
             </div>
 
             <form id="document-form" class="document-form">
                 <div class="form-section">
                     <h3>Tipo de Documento</h3>
-
-                    <div class="form-row">
-                        <div class="form-group">
+                    
+                    <div class="form-row"> 
+                        <div class="form-group"> 
                             <label>Selecione o tipo *</label>
                             <div class="radio-group">
                                 <label class="radio-label">
                                     <input type="radio" name="documentType" value="orcamento" checked>
-                                    <span>Orçamento</span>
+                                    <span>📋 Orçamento</span>
                                 </label>
                                 <label class="radio-label">
                                     <input type="radio" name="documentType" value="recibo">
-                                    <span>Recibo</span>
+                                    <span>🧾 Recibo</span>
                                 </label>
                             </div>
                         </div>
-                    </div>
+                    </div> 
                 </div>
 
                 <div class="form-section">
@@ -273,7 +286,6 @@
                             <input type="text" id="client-cpfcnpj" placeholder="000.000.000-00" required>
                         </div>
                     </div>
-
                     <div class="form-row">
                         <div class="form-group">
                             <label>Endereço</label>
@@ -288,8 +300,9 @@
 
                 <div class="form-section">
                     <h3>Itens</h3>
-                    <div id="items-container"></div>
-                    <button type="button" class="btn-secondary" onclick="addItemRow()">Adicionar item</button>
+                    <div id="items-container">
+                    </div>
+                    <button type="button" class="btn-secondary" onclick="addItemRow()">➕ Adicionar Item</button>
                 </div>
 
                 <div class="form-section">
@@ -299,24 +312,20 @@
                             <label>Subtotal:</label>
                             <span id="display-subtotal">R$ 0,00</span>
                         </div>
-
                         <div class="total-item">
                             <label>Desconto (%):</label>
                             <input type="number" id="discount-percent" min="0" max="100" value="0" step="0.1">
                         </div>
-
                         <div class="total-item">
                             <label>Valor Desconto:</label>
                             <span id="display-discount">R$ 0,00</span>
                         </div>
-
                         <div class="total-item">
                             <label>Impostos/Taxas:</label>
                             <input type="number" id="tax-value" min="0" value="0" step="0.01">
                         </div>
-
                         <div class="total-item highlight">
-                            <label><strong>Total:</strong></label>
+                            <label><strong>TOTAL:</strong></label>
                             <span id="display-total"><strong>R$ 0,00</strong></span>
                         </div>
                     </div>
@@ -332,10 +341,9 @@
                                 <option value="parcelado">Parcelado</option>
                             </select>
                         </div>
-
                         <div class="form-group" id="installments-group" style="display: none;">
-                            <label>Número de Parcelas</label>
-                            <select id="installments-number">
+                            <label>Número de Parcelas</label><br>
+                            <select id="installments-number" style="margin-top: 4.4px;">
                                 <option value="2">2x</option>
                                 <option value="3">3x</option>
                                 <option value="4">4x</option>
@@ -350,7 +358,6 @@
                             </select>
                         </div>
                     </div>
-
                     <div id="installments-display"></div>
                 </div>
 
@@ -366,7 +373,6 @@
                             <input type="text" id="document-location" value="São Paulo, SP" required>
                         </div>
                     </div>
-
                     <div class="form-row">
                         <div class="form-group">
                             <label>Responsável Técnico *</label>
@@ -377,7 +383,6 @@
                             <input type="number" id="validade-dias" value="30" min="1">
                         </div>
                     </div>
-
                     <div class="form-row">
                         <div class="form-group full-width">
                             <label>Observações</label>
@@ -387,8 +392,8 @@
                 </div>
 
                 <div class="form-actions">
-                    <button type="button" class="btn-secondary" onclick="previewDocument()">Visualizar</button>
-                    <button type="submit" class="btn-primary">Salvar documento</button>
+                    <button type="button" class="btn-secondary" onclick="previewDocument()">👁️ Visualizar</button>
+                    <button type="submit" class="btn-primary">💾 Salvar Documento</button>
                 </div>
             </form>
         </section>
@@ -396,28 +401,28 @@
         <section id="products-view" class="view-section">
             <div class="view-header">
                 <h2>Catálogo de Serviços</h2>
-                <button class="btn-primary" onclick="openProductModal()">Novo serviço</button>
+                <button class="btn-primary" onclick="openProductModal()">➕ Novo Serviço</button>
             </div>
-            <div class="products-grid" id="products-grid"></div>
+            <div class="products-grid" id="products-grid">
+            </div>
         </section>
 
         <section id="clients-view" class="view-section">
             <div class="view-header">
                 <h2>Cadastro de Clientes</h2>
-                <button class="btn-primary" onclick="openClientModal()">Novo cliente</button>
+                <button class="btn-primary" onclick="openClientModal()">➕ Novo Cliente</button>
             </div>
-            <div class="clients-grid" id="clients-grid"></div>
+            <div class="clients-grid" id="clients-grid">
+            </div>
         </section>
 
         <section id="settings-view" class="view-section">
             <div class="view-header">
                 <h2>Configurações da Empresa</h2>
             </div>
-
             <form id="company-form" class="document-form">
                 <div class="form-section">
                     <h3>Dados da Empresa</h3>
-
                     <div class="form-row">
                         <div class="form-group">
                             <label>Razão Social *</label>
@@ -428,7 +433,6 @@
                             <input type="text" id="company-fantasia">
                         </div>
                     </div>
-
                     <div class="form-row">
                         <div class="form-group">
                             <label>CNPJ *</label>
@@ -439,7 +443,6 @@
                             <input type="text" id="company-phone">
                         </div>
                     </div>
-
                     <div class="form-row">
                         <div class="form-group">
                             <label>E-mail</label>
@@ -451,26 +454,26 @@
                         </div>
                     </div>
                 </div>
-
                 <div class="form-actions">
-                    <button type="submit" class="btn-primary">Salvar</button>
+                    <button type="submit" class="btn-primary">💾 Salvar</button>
                 </div>
             </form>
         </section>
+
     </main>
 
     <div id="preview-modal" class="modal">
         <div class="modal-content large">
             <div class="modal-header">
-                <h3>Visualização do Documento</h3>
+                <h3>👁️ Visualização do Documento</h3>
                 <button class="modal-close" onclick="closePreview()">&times;</button>
             </div>
             <div class="modal-body">
                 <div id="preview-content"></div>
             </div>
             <div class="modal-footer">
-                <button class="btn-secondary" onclick="exportPDF()">Exportar PDF</button>
-                <button class="btn-secondary" onclick="exportDOCX()">Exportar DOCX</button>
+                <button class="btn-secondary" onclick="exportPDF()">📄 PDF</button>
+                <button class="btn-secondary" onclick="exportDOCX()">📝 DOCX</button>
             </div>
         </div>
     </div>
@@ -478,7 +481,7 @@
     <div id="product-modal" class="modal">
         <div class="modal-content">
             <div class="modal-header">
-                <h3>Novo Serviço</h3>
+                <h3>➕ Novo Serviço/Produto</h3>
                 <button class="modal-close" onclick="closeProductModal()">&times;</button>
             </div>
             <form id="product-form">
@@ -511,7 +514,7 @@
     <div id="client-modal" class="modal">
         <div class="modal-content">
             <div class="modal-header">
-                <h3>Novo Cliente</h3>
+                <h3>➕ Novo Cliente</h3>
                 <button class="modal-close" onclick="closeClientModal()">&times;</button>
             </div>
             <form id="client-form">
@@ -543,6 +546,7 @@
 
     <datalist id="services-list"></datalist>
 
+    <!-- Scripts carregados como normais, não módulos -->
     <script src="js/utils.js"></script>
     <script src="js/app.js"></script>
 </body>
