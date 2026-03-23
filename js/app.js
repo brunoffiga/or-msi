@@ -18,47 +18,33 @@ function showToast(message, type = 'info') {
     const container = document.getElementById('toast-container');
     const toast = document.createElement('div');
     toast.className = `toast ${type}`;
-    
-    const icons = {
-        success: '✅',
-        error: '❌',
-        warning: '⚠️',
-        info: 'ℹ️'
-    };
-    
+
     toast.innerHTML = `
-        <span class="toast-icon">${icons[type]}</span>
         <span class="toast-message">${message}</span>
         <span class="toast-close" onclick="this.parentElement.remove()">✕</span>
     `;
-    
+
     container.appendChild(toast);
-    
-    // Auto remover após 5 segundos
+
     setTimeout(() => {
         toast.remove();
     }, 5000);
 }
 
 function showLoading(show = true) {
-    const overlay = document.getElementById('loading-overlay');
-    if (show) {
-        overlay.classList.add('active');
-    } else {
-        overlay.classList.remove('active');
-    }
+    return;
 }
 
 // ===== INICIALIZAÇÃO =====
 document.addEventListener('DOMContentLoaded', async function() {
-    console.log('🚀 Inicializando aplicação MSI...');
+    console.log('Inicializando aplicação MSI...');
     
     // Inicializar Supabase
     if (typeof supabase !== 'undefined') {
         supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
         await initializeDatabase();
     } else {
-        console.error('❌ Supabase não carregado! Verifique a conexão.');
+        console.error('Supabase não carregado! Verifique a conexão.');
         showToast('Erro ao conectar com o banco de dados', 'error');
     }
     
@@ -76,6 +62,7 @@ document.addEventListener('DOMContentLoaded', async function() {
     setupDocumentForm();
     setupSettingsForm();
     setupModals();
+    setupModalCloseHandlers();
     
     // Adicionar primeira linha de item
     addItemRow();
@@ -90,7 +77,7 @@ document.addEventListener('DOMContentLoaded', async function() {
     // Data padrão
     document.getElementById('document-date').valueAsDate = new Date();
     
-    console.log('✅ Aplicação inicializada!');
+    console.log('Aplicação inicializada!');
 });
 
 // ===== INICIALIZAÇÃO DO BANCO =====
@@ -228,7 +215,7 @@ function clearForm() {
     const title = document.querySelector('#create-view .view-header h2');
     if (title) {
         // Ajuste este texto se o seu título original for outro
-        title.textContent = 'Criar Novo Documento'; 
+        title.textContent = 'Novo Documento'; 
     }
     // --- FIM DA ATUALIZAÇÃO ---
 }
@@ -236,30 +223,31 @@ function clearForm() {
 // ===== DASHBOARD (Modificada) =====
 async function loadDashboard(filters = {}) {
     try {
-        showLoading(true);
-        
-        // 1. Buscar e filtrar os documentos
         const filteredDocs = await getFilteredDocuments(filters);
-        
-        // 2. Calcular estatísticas com base nos dados FILTRADOS
+
         const orcamentos = filteredDocs.filter(d => d.type === 'orcamento');
         const recibos = filteredDocs.filter(d => d.type === 'recibo');
-        const totalValue = filteredDocs.reduce((sum, doc) => sum + (parseFloat(doc.total) || 0), 0);
-        
-        // 3. Atualizar os cards de estatísticas
-        document.getElementById('stat-total').textContent = filteredDocs.length;
-        document.getElementById('stat-orcamentos').textContent = orcamentos.length;
-        document.getElementById('stat-recibos').textContent = recibos.length;
-        document.getElementById('stat-total-value').textContent = Utils.formatMoney(totalValue);
-        
-        // 4. Renderizar a tabela com os mesmos dados filtrados
+
+        const orcamentosValue = orcamentos.reduce((sum, doc) => sum + (parseFloat(doc.total) || 0), 0);
+        const recibosValue = recibos.reduce((sum, doc) => sum + (parseFloat(doc.total) || 0), 0);
+        const totalValue = orcamentosValue + recibosValue;
+
+        const setText = (id, value) => {
+            const el = document.getElementById(id);
+            if (el) el.textContent = value;
+        };
+
+        setText('stat-orcamentos-count', `${orcamentos.length} documento${orcamentos.length !== 1 ? 's' : ''}`);
+        setText('stat-orcamentos-value', Utils.formatMoney(orcamentosValue));
+        setText('stat-recibos-count', `${recibos.length} documento${recibos.length !== 1 ? 's' : ''}`);
+        setText('stat-recibos-value', Utils.formatMoney(recibosValue));
+        setText('stat-total-count', `${filteredDocs.length} documento${filteredDocs.length !== 1 ? 's' : ''}`);
+        setText('stat-total-value', Utils.formatMoney(totalValue));
+
         renderDocumentsTable(filteredDocs);
-        
     } catch (error) {
         console.error('Erro ao carregar dashboard:', error);
         showToast('Erro ao carregar dados', 'error');
-    } finally {
-        showLoading(false);
     }
 }
 
@@ -372,13 +360,13 @@ function renderDocumentsTable(filteredDocuments) {
                         <select class="status-select" onchange="updateDocumentStatus('${id}', this.value)" 
                                 style="padding: 0.4rem; border: 2px solid var(--border); border-radius: 6px; 
                                        font-size: 0.9rem; cursor: pointer; font-weight: 600;">
-                            <option value="Aguardando" ${currentStatus === 'Aguardando' ? 'selected' : ''}>⏳ Aguardando</option>
-                            <option value="Aprovado" ${currentStatus === 'Aprovado' ? 'selected' : ''}>✅ Aprovado</option>
-                            <option value="Em Execução" ${currentStatus === 'Em Execução' ? 'selected' : ''}>🔄 Em Execução</option>
+                            <option value="Aguardando" ${currentStatus === 'Aguardando' ? 'selected' : ''}>Aguardando</option>
+                            <option value="Aprovado" ${currentStatus === 'Aprovado' ? 'selected' : ''}>Aprovado</option>
+                            <option value="Em Execução" ${currentStatus === 'Em Execução' ? 'selected' : ''}>Em Execução</option>
                             <option value="Concluído" ${currentStatus === 'Concluído' ? 'selected' : ''}>🏁 Concluído</option>
-                            <option value="Faturado" ${currentStatus === 'Faturado' ? 'selected' : ''}>💰 Faturado</option>
-                            <option value="Pago" ${currentStatus === 'Pago' ? 'selected' : ''}>💚 Pago</option>
-                            <option value="Cancelado" ${currentStatus === 'Cancelado' ? 'selected' : ''}>❌ Cancelado</option>
+                            <option value="Faturado" ${currentStatus === 'Faturado' ? 'selected' : ''}>Faturado</option>
+                            <option value="Pago" ${currentStatus === 'Pago' ? 'selected' : ''}>Pago</option>
+                            <option value="Cancelado" ${currentStatus === 'Cancelado' ? 'selected' : ''}>Cancelado</option>
                         </select>
                     </td>
                 </tr>
@@ -406,15 +394,21 @@ window.viewDocument = async function(id, type) {
         if (data) {
             currentDocument = formatDocumentFromDB(data);
             renderPreview(currentDocument);
+
+            const previewTitle = document.querySelector('#preview-modal .modal-header h3');
+            if (previewTitle) {
+                const clientName = currentDocument.clientSnapshot?.name || currentDocument.client_snapshot?.name || 'Cliente';
+                previewTitle.textContent = `${clientName} • #${currentDocument.id}`;
+            }
             
             const modalFooter = document.querySelector('#preview-modal .modal-footer');
             modalFooter.innerHTML = `
                 <button class="btn-secondary" onclick="exportPDF()">📄 PDF</button>
                 <button class="btn-secondary" onclick="exportDOCX()">📝 DOCX</button>
-                ${type === 'orcamento' ? `<button class="btn-secondary" onclick="convertToRecibo('${id}')">🔄 Converter em Recibo</button>` : ''}
-                <button class="btn-secondary" onclick="editDocument('${id}', '${type}')">✏️ Editar</button>
+                ${type === 'orcamento' ? `<button class="btn-secondary" onclick="convertToRecibo('${id}')">Converter em recibo</button>` : ''}
+                <button class="btn-secondary" onclick="editDocument('${id}', '${type}')">Editar</button>
                 <button class="btn-secondary" onclick="duplicateDocument('${id}', '${type}')">📑 Duplicar</button>
-                <button class="btn-danger" onclick="deleteDocumentConfirm('${id}', '${type}')">🗑️ Excluir</button>
+                <button class="btn-danger" onclick="deleteDocumentConfirm('${id}', '${type}')">Excluir</button>
             `;
             
             document.getElementById('preview-modal').classList.add('active');
@@ -581,9 +575,14 @@ window.updateDocumentStatus = async function(id, newStatus) {
             .from('documents')
             .update({ status: newStatus })
             .eq('id', id);
-        
+
         if (error) throw error;
-        
+
+        if (currentDocument && String(currentDocument.id) === String(id)) {
+            currentDocument.status = newStatus;
+        }
+
+        await loadDashboard(getCurrentFilters());
         showToast('Status atualizado', 'success');
     } catch (error) {
         console.error('Erro ao atualizar status:', error);
@@ -799,7 +798,7 @@ window.addItemRow = function(itemData = null) {
             <label>Subtotal</label>
             <div class="item-subtotal" data-subtotal="0">R$ 0,00</div>
         </div>
-        <button type="button" class="btn-remove-item" onclick="removeItemRow(this)">✖</button>
+        <button type="button" class="btn-remove-item" onclick="removeItemRow(this)">Remover</button>
     `;
     
     container.appendChild(itemRow);
@@ -1022,6 +1021,12 @@ window.previewDocument = async function() {
     };
     
     renderPreview(currentDocument);
+
+    const previewTitle = document.querySelector('#preview-modal .modal-header h3');
+    if (previewTitle) {
+        const clientName = currentDocument.clientSnapshot?.name || 'Cliente';
+        previewTitle.textContent = `${clientName} • #${currentDocument.id}`;
+    }
     
     const modalFooter = document.querySelector('#preview-modal .modal-footer');
     modalFooter.innerHTML = `
@@ -1653,6 +1658,17 @@ window.exportDOCX = async function() {
     }
 };
 
+
+function getCurrentFilters() {
+    return {
+        type: document.getElementById('filter-type')?.value || '',
+        status: document.getElementById('filter-status')?.value || '',
+        dateStart: document.getElementById('filter-date-start')?.value || '',
+        dateEnd: document.getElementById('filter-date-end')?.value || '',
+        search: document.getElementById('filter-search')?.value || ''
+    };
+}
+
 // ===== FILTROS =====
 function setupDynamicFilters() {
     ['filter-type', 'filter-status', 'filter-date-start', 'filter-date-end', 'filter-search'].forEach(id => {
@@ -1724,8 +1740,8 @@ async function loadProducts() {
                         Preço: <strong>${Utils.formatMoney(product.unit_price)}</strong>
                     </div>
                     <div class="card-actions">
-                        <button class="action-btn" onclick="editProduct('${product.id}')">✏️</button>
-                        <button class="action-btn" onclick="deleteProduct('${product.id}')">🗑️</button>
+                        <button class="action-btn" onclick="editProduct('${product.id}')">Editar</button>
+                        <button class="action-btn" onclick="deleteProduct('${product.id}')">Excluir</button>
                     </div>
                 </div>
             `;
@@ -1761,8 +1777,8 @@ async function loadClients() {
                     ${client.contact ? `Contato: ${client.contact}` : ''}
                 </div>
                 <div class="card-actions">
-                    <button class="action-btn" onclick="editClient('${client.id}')">✏️</button>
-                    <button class="action-btn" onclick="deleteClient('${client.id}')">🗑️</button>
+                    <button class="action-btn" onclick="editClient('${client.id}')">Editar</button>
+                    <button class="action-btn" onclick="deleteClient('${client.id}')">Excluir</button>
                 </div>
             </div>
         `).join('');
@@ -1846,7 +1862,7 @@ function showEditBanner(doc) {
                         </div>
                     </div>
                     <button onclick="cancelEdit()" style="padding: 0.6rem 1.2rem; background: white; border: 2px solid #f59e0b; border-radius: 6px; cursor: pointer; font-weight: 600; color: #92400e;">
-                        ✖ Cancelar Edição
+                        Cancelar edição
                     </button>
                 </div>
             </div>
@@ -1873,7 +1889,7 @@ function showEditBanner(doc) {
     // 3. Atualizar o título da view
     const title = document.querySelector('#create-view .view-header h2');
     if (title) {
-        title.textContent = `✏️ Editando ${doc.type === 'orcamento' ? 'Orçamento' : 'Recibo'} #${doc.id}`;
+        title.textContent = `Editando ${doc.type === 'orcamento' ? 'Orçamento' : 'Recibo'} #${doc.id}`;
     }
 }
 
@@ -2008,14 +2024,13 @@ function setupModalCloseHandlers() {
     });
 }
 
-// Chame esta função ao inicializar (já existe chamada para setupModals() no DOMContentLoaded)
-setupModalCloseHandlers();
 
 // Modal functions
 
 window.openProductModal = function() {
     document.getElementById('product-form').reset();
     delete document.getElementById('product-form').dataset.editId;
+    document.querySelector('#product-modal .modal-header h3').textContent = 'Novo serviço';
     document.getElementById('product-modal').classList.add('active');
 };
 
@@ -2032,6 +2047,7 @@ window.editProduct = async function(id) {
             .single();
         
         if (product) {
+            document.querySelector('#product-modal .modal-header h3').textContent = 'Editar serviço';
             document.getElementById('product-modal').classList.add('active');
             document.getElementById('product-name').value = product.name;
             document.getElementById('product-service-type').value = product.service_type;
@@ -2064,6 +2080,7 @@ window.deleteProduct = async function(id) {
 window.openClientModal = function() {
     document.getElementById('client-form').reset();
     delete document.getElementById('client-form').dataset.editId;
+    document.querySelector('#client-modal .modal-header h3').textContent = 'Novo cliente';
     document.getElementById('client-modal').classList.add('active');
 };
 
@@ -2080,6 +2097,7 @@ window.editClient = async function(id) {
             .single();
         
         if (client) {
+            document.querySelector('#client-modal .modal-header h3').textContent = 'Editar cliente';
             document.getElementById('client-modal').classList.add('active');
             document.getElementById('modal-client-name').value = client.name;
             document.getElementById('modal-client-cpfcnpj').value = client.cpf_cnpj;
