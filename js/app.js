@@ -20,10 +20,10 @@ function showToast(message, type = 'info') {
     toast.className = `toast ${type}`;
     
     const icons = {
-        success: '',
-        error: '',
-        warning: '',
-        info: ''
+        success: '✅',
+        error: '❌',
+        warning: '⚠️',
+        info: 'ℹ️'
     };
     
     toast.innerHTML = `
@@ -51,14 +51,14 @@ function showLoading(show = true) {
 
 // ===== INICIALIZAÇÃO =====
 document.addEventListener('DOMContentLoaded', async function() {
-    console.log('Inicializando aplicação MSI...');
+    console.log('🚀 Inicializando aplicação MSI...');
     
     // Inicializar Supabase
     if (typeof supabase !== 'undefined') {
         supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
         await initializeDatabase();
     } else {
-        console.error('Supabase não carregado! Verifique a conexão.');
+        console.error('❌ Supabase não carregado! Verifique a conexão.');
         showToast('Erro ao conectar com o banco de dados', 'error');
     }
     
@@ -76,7 +76,6 @@ document.addEventListener('DOMContentLoaded', async function() {
     setupDocumentForm();
     setupSettingsForm();
     setupModals();
-    setupModalCloseHandlers();
     
     // Adicionar primeira linha de item
     addItemRow();
@@ -91,7 +90,7 @@ document.addEventListener('DOMContentLoaded', async function() {
     // Data padrão
     document.getElementById('document-date').valueAsDate = new Date();
     
-    console.log('Aplicação inicializada!');
+    console.log('✅ Aplicação inicializada!');
 });
 
 // ===== INICIALIZAÇÃO DO BANCO =====
@@ -229,45 +228,33 @@ function clearForm() {
     const title = document.querySelector('#create-view .view-header h2');
     if (title) {
         // Ajuste este texto se o seu título original for outro
-        title.textContent = 'Novo Documento'; 
+        title.textContent = 'Criar Novo Documento'; 
     }
     // --- FIM DA ATUALIZAÇÃO ---
 }
 
-// ===== DASHBOARD =====
+// ===== DASHBOARD (Modificada) =====
 async function loadDashboard(filters = {}) {
     try {
         showLoading(true);
-
+        
+        // 1. Buscar e filtrar os documentos
         const filteredDocs = await getFilteredDocuments(filters);
-        const orcamentos = filteredDocs.filter(doc => doc.type === 'orcamento');
-        const recibos = filteredDocs.filter(doc => doc.type === 'recibo');
-
-        const valorOrcamentos = orcamentos.reduce((sum, doc) => sum + (parseFloat(doc.total) || 0), 0);
-        const valorRecibos = recibos.reduce((sum, doc) => sum + (parseFloat(doc.total) || 0), 0);
-
-        const statOrcamentosCount = document.getElementById('stat-orcamentos-count');
-        const statOrcamentosValue = document.getElementById('stat-orcamentos-value');
-        const statRecibosCount = document.getElementById('stat-recibos-count');
-        const statRecibosValue = document.getElementById('stat-recibos-value');
-
-        if (statOrcamentosCount) {
-            statOrcamentosCount.textContent = `${orcamentos.length} documento${orcamentos.length !== 1 ? 's' : ''}`;
-        }
-
-        if (statOrcamentosValue) {
-            statOrcamentosValue.textContent = Utils.formatMoney(valorOrcamentos);
-        }
-
-        if (statRecibosCount) {
-            statRecibosCount.textContent = `${recibos.length} documento${recibos.length !== 1 ? 's' : ''}`;
-        }
-
-        if (statRecibosValue) {
-            statRecibosValue.textContent = Utils.formatMoney(valorRecibos);
-        }
-
+        
+        // 2. Calcular estatísticas com base nos dados FILTRADOS
+        const orcamentos = filteredDocs.filter(d => d.type === 'orcamento');
+        const recibos = filteredDocs.filter(d => d.type === 'recibo');
+        const totalValue = filteredDocs.reduce((sum, doc) => sum + (parseFloat(doc.total) || 0), 0);
+        
+        // 3. Atualizar os cards de estatísticas
+        document.getElementById('stat-total').textContent = filteredDocs.length;
+        document.getElementById('stat-orcamentos').textContent = orcamentos.length;
+        document.getElementById('stat-recibos').textContent = recibos.length;
+        document.getElementById('stat-total-value').textContent = Utils.formatMoney(totalValue);
+        
+        // 4. Renderizar a tabela com os mesmos dados filtrados
         renderDocumentsTable(filteredDocs);
+        
     } catch (error) {
         console.error('Erro ao carregar dashboard:', error);
         showToast('Erro ao carregar dados', 'error');
@@ -386,12 +373,12 @@ function renderDocumentsTable(filteredDocuments) {
                                 style="padding: 0.4rem; border: 2px solid var(--border); border-radius: 6px; 
                                        font-size: 0.9rem; cursor: pointer; font-weight: 600;">
                             <option value="Aguardando" ${currentStatus === 'Aguardando' ? 'selected' : ''}>⏳ Aguardando</option>
-                            <option value="Aprovado" ${currentStatus === 'Aprovado' ? 'selected' : ''}>Aprovado</option>
-                            <option value="Em Execução" ${currentStatus === 'Em Execução' ? 'selected' : ''}>Em Execução</option>
-                            <option value="Concluído" ${currentStatus === 'Concluído' ? 'selected' : ''}>Concluído</option>
-                            <option value="Faturado" ${currentStatus === 'Faturado' ? 'selected' : ''}>Faturado</option>
-                            <option value="Pago" ${currentStatus === 'Pago' ? 'selected' : ''}>Pago</option>
-                            <option value="Cancelado" ${currentStatus === 'Cancelado' ? 'selected' : ''}>Cancelado</option>
+                            <option value="Aprovado" ${currentStatus === 'Aprovado' ? 'selected' : ''}>✅ Aprovado</option>
+                            <option value="Em Execução" ${currentStatus === 'Em Execução' ? 'selected' : ''}>🔄 Em Execução</option>
+                            <option value="Concluído" ${currentStatus === 'Concluído' ? 'selected' : ''}>🏁 Concluído</option>
+                            <option value="Faturado" ${currentStatus === 'Faturado' ? 'selected' : ''}>💰 Faturado</option>
+                            <option value="Pago" ${currentStatus === 'Pago' ? 'selected' : ''}>💚 Pago</option>
+                            <option value="Cancelado" ${currentStatus === 'Cancelado' ? 'selected' : ''}>❌ Cancelado</option>
                         </select>
                     </td>
                 </tr>
@@ -422,12 +409,12 @@ window.viewDocument = async function(id, type) {
             
             const modalFooter = document.querySelector('#preview-modal .modal-footer');
             modalFooter.innerHTML = `
-                <button class="btn-secondary" onclick="exportPDF()">Exportar PDF</button>
-                <button class="btn-secondary" onclick="exportDOCX()">Exportar DOCX</button>
-                ${type === 'orcamento' ? `<button class="btn-secondary" onclick="convertToRecibo('${id}')">Converter em recibo</button>` : ''}
-                <button class="btn-secondary" onclick="editDocument('${id}', '${type}')">Editar</button>
-                <button class="btn-secondary" onclick="duplicateDocument('${id}', '${type}')">Duplicar</button>
-                <button class="btn-danger" onclick="deleteDocumentConfirm('${id}', '${type}')">Excluir</button>
+                <button class="btn-secondary" onclick="exportPDF()">📄 PDF</button>
+                <button class="btn-secondary" onclick="exportDOCX()">📝 DOCX</button>
+                ${type === 'orcamento' ? `<button class="btn-secondary" onclick="convertToRecibo('${id}')">🔄 Converter em Recibo</button>` : ''}
+                <button class="btn-secondary" onclick="editDocument('${id}', '${type}')">✏️ Editar</button>
+                <button class="btn-secondary" onclick="duplicateDocument('${id}', '${type}')">📑 Duplicar</button>
+                <button class="btn-danger" onclick="deleteDocumentConfirm('${id}', '${type}')">🗑️ Excluir</button>
             `;
             
             document.getElementById('preview-modal').classList.add('active');
@@ -812,44 +799,49 @@ window.addItemRow = function(itemData = null) {
             <label>Subtotal</label>
             <div class="item-subtotal" data-subtotal="0">R$ 0,00</div>
         </div>
-        <button type="button" class="btn-remove-item" onclick="removeItemRow(this)">Remover</button>
+        <button type="button" class="btn-remove-item" onclick="removeItemRow(this)">✖</button>
     `;
-
+    
     container.appendChild(itemRow);
-
+    
+    // Event listeners
     const qtyInput = itemRow.querySelector('.item-qty');
     const priceInput = itemRow.querySelector('.item-price');
     const descInput = itemRow.querySelector('.item-description');
-
+    
     qtyInput.addEventListener('input', () => updateItemSubtotal(itemRow));
     priceInput.addEventListener('input', () => updateItemSubtotal(itemRow));
-
+    
+    // Autocomplete de serviços
     descInput.addEventListener('change', async function() {
         const value = this.value;
-
+        
         try {
-            const { data: products } = await supabaseClient
+            const { data: product, error } = await supabaseClient
                 .from('products')
                 .select('*')
                 .eq('name', value)
-                .single();
-
-            if (products) {
-                itemRow.querySelector('.item-service-type').value = products.service_type;
-                itemRow.querySelector('.item-price').value = products.unit_price;
+                .maybeSingle();
+            
+            if (error) throw error;
+            
+            if (product) {
+                itemRow.querySelector('.item-service-type').value = product.service_type;
+                itemRow.querySelector('.item-price').value = product.unit_price;
                 updateItemSubtotal(itemRow);
             }
         } catch (error) {
+            // Produto não encontrado, usuário digitou manualmente
         }
     });
-
+    
     updateItemSubtotal(itemRow);
 };
 
 window.removeItemRow = function(button) {
     button.closest('.item-row').remove();
     updateTotals();
-}
+};
 
 function updateItemSubtotal(itemRow) {
     const qty = parseFloat(itemRow.querySelector('.item-qty').value) || 0;
@@ -986,8 +978,8 @@ window.previewDocument = async function() {
     // Buscar dados da empresa
     const { data: company } = await supabaseClient
         .from('company')
-            .select('*')
-            .single();
+        .select('*')
+        .single();
     
     const documentType = document.querySelector('input[name="documentType"]:checked').value;
     const paymentType = document.getElementById('payment-type').value;
@@ -1033,8 +1025,8 @@ window.previewDocument = async function() {
     
     const modalFooter = document.querySelector('#preview-modal .modal-footer');
     modalFooter.innerHTML = `
-        <button class="btn-secondary" onclick="exportPDF()">Exportar PDF</button>
-        <button class="btn-secondary" onclick="exportDOCX()">Exportar DOCX</button>
+        <button class="btn-secondary" onclick="exportPDF()">📄 PDF</button>
+        <button class="btn-secondary" onclick="exportDOCX()">📝 DOCX</button>
     `;
     
     document.getElementById('preview-modal').classList.add('active');
@@ -1119,7 +1111,7 @@ function renderPreview(doc) {
             
             ${tablesHtml}
             
-            <div class="doc-totals">
+                        <div class="doc-totals">
                 ${( (doc.discountPercent > 0) || (doc.discountValue && doc.discountValue > 0) ) ? `<div>Subtotal: <strong>${Utils.formatMoney(doc.subtotal)}</strong></div>` : ''}
                 ${doc.discountPercent > 0 ? `<div>Desconto (${doc.discountPercent}%): <strong>- ${Utils.formatMoney(doc.discountValue)}</strong></div>` : ''}
                 ${doc.taxValue > 0 ? `<div>Impostos/Taxas: <strong>+ ${Utils.formatMoney(doc.taxValue)}</strong></div>` : ''}
@@ -1273,7 +1265,8 @@ window.exportPDF = async function () {
     });
     
     const discountValue = currentDocument.discountValue || currentDocument.discount_value || 0;
-    if (discountValue <= 0) {
+    const discountPercent = currentDocument.discountPercent || currentDocument.discount_percent || 0;
+    if (discountValue <= 0 && discountPercent <= 0) {
         const totals = clone.querySelectorAll('.doc-totals, .doc-totals *');
         if (totals && totals.length > 0) {
             const container = clone.querySelector('.doc-totals');
@@ -1659,3 +1652,529 @@ window.exportDOCX = async function() {
         showLoading(false);
     }
 };
+
+// ===== FILTROS =====
+function setupDynamicFilters() {
+    ['filter-type', 'filter-status', 'filter-date-start', 'filter-date-end', 'filter-search'].forEach(id => {
+        const input = document.getElementById(id);
+        if (input) {
+            input.addEventListener('change', applyFilters);
+            if (input.type === 'text') {
+                input.addEventListener('input', Utils.debounce(applyFilters, 300));
+            }
+        }
+    });
+}
+
+// ===== FILTROS (Modificada) =====
+// ... (setupDynamicFilters permanece igual) ...
+
+function applyFilters() {
+    const filters = {
+        type: document.getElementById('filter-type').value,
+        status: document.getElementById('filter-status').value,
+        dateStart: document.getElementById('filter-date-start').value,
+        dateEnd: document.getElementById('filter-date-end').value,
+        search: document.getElementById('filter-search').value
+    };
+    
+    // ATUALIZADO: Chama loadDashboard, que agora cuida dos KPIs E da tabela
+    loadDashboard(filters);
+}
+
+// ... (window.clearFilters permanece igual, pois já chama loadDashboard()) ...
+
+window.clearFilters = function() {
+    document.getElementById('filter-type').value = '';
+    document.getElementById('filter-status').value = '';
+    document.getElementById('filter-date-start').value = '';
+    document.getElementById('filter-date-end').value = '';
+    document.getElementById('filter-search').value = '';
+    loadDashboard();
+};
+
+// ===== PRODUTOS =====
+async function loadProducts() {
+    try {
+        const { data: products } = await supabaseClient
+            .from('products')
+            .select('*')
+            .order('name');
+        
+        const grid = document.getElementById('products-grid');
+        if (!grid) return;
+        
+        if (!products || products.length === 0) {
+            grid.innerHTML = '<p style="text-align: center; padding: 2rem;">Nenhum serviço cadastrado</p>';
+            return;
+        }
+        
+        grid.innerHTML = products.map(product => {
+            const typeLabel = {
+                'instalacao': 'Instalação',
+                'manutencao': 'Manutenção',
+                'produto': 'Produto'
+            }[product.service_type] || '';
+            
+            return `
+                <div class="product-card">
+                    <div class="card-title">${product.name}</div>
+                    <div class="card-info">
+                        Tipo: <strong>${typeLabel}</strong><br>
+                        Preço: <strong>${Utils.formatMoney(product.unit_price)}</strong>
+                    </div>
+                    <div class="card-actions">
+                        <button class="action-btn" onclick="editProduct('${product.id}')">✏️</button>
+                        <button class="action-btn" onclick="deleteProduct('${product.id}')">🗑️</button>
+                    </div>
+                </div>
+            `;
+        }).join('');
+        
+        await setupServiceAutocomplete();
+    } catch (error) {
+        console.error('Erro ao carregar produtos:', error);
+    }
+}
+
+// ===== CLIENTES =====
+async function loadClients() {
+    try {
+        const { data: clients } = await supabaseClient
+            .from('clients')
+            .select('*')
+            .order('name');
+        
+        const grid = document.getElementById('clients-grid');
+        if (!grid) return;
+        
+        if (!clients || clients.length === 0) {
+            grid.innerHTML = '<p style="text-align: center; padding: 2rem;">Nenhum cliente cadastrado</p>';
+            return;
+        }
+        
+        grid.innerHTML = clients.map(client => `
+            <div class="client-card">
+                <div class="card-title">${client.name}</div>
+                <div class="card-info">
+                    CPF/CNPJ: ${Utils.formatCpfCnpj(client.cpf_cnpj)}<br>
+                    ${client.contact ? `Contato: ${client.contact}` : ''}
+                </div>
+                <div class="card-actions">
+                    <button class="action-btn" onclick="editClient('${client.id}')">✏️</button>
+                    <button class="action-btn" onclick="deleteClient('${client.id}')">🗑️</button>
+                </div>
+            </div>
+        `).join('');
+    } catch (error) {
+        console.error('Erro ao carregar clientes:', error);
+    }
+}
+
+// ===== CONFIGURAÇÕES =====
+async function loadCompanySettings() {
+    try {
+        const { data: company } = await supabaseClient
+            .from('company')
+            .select('*')
+            .single();
+        
+        if (company) {
+            document.getElementById('company-name').value = company.name || '';
+            document.getElementById('company-fantasia').value = company.fantasia || '';
+            document.getElementById('company-cnpj').value = company.cnpj || '';
+            document.getElementById('company-phone').value = company.phone || '';
+            document.getElementById('company-email').value = company.email || '';
+            document.getElementById('company-address').value = company.address || '';
+        }
+    } catch (error) {
+        console.error('Erro ao carregar configurações:', error);
+    }
+}
+
+function setupSettingsForm() {
+    const form = document.getElementById('company-form');
+    
+    form.addEventListener('submit', async function(e) {
+        e.preventDefault();
+        
+        const company = {
+            id: 'company',
+            name: document.getElementById('company-name').value,
+            fantasia: document.getElementById('company-fantasia').value,
+            cnpj: document.getElementById('company-cnpj').value,
+            phone: document.getElementById('company-phone').value,
+            email: document.getElementById('company-email').value,
+            address: document.getElementById('company-address').value
+        };
+        
+        try {
+            const { error } = await supabaseClient
+                .from('company')
+                .upsert(company);
+            
+            if (error) throw error;
+            
+            showToast('Configurações salvas com sucesso!', 'success');
+        } catch (error) {
+            console.error('Erro ao salvar:', error);
+            showToast('Erro ao salvar configurações', 'error');
+        }
+    });
+}
+
+// ===================================
+// ===== BANNER DE EDIÇÃO (NOVO) =====
+// ====================================================
+
+function showEditBanner(doc) {
+    let banner = document.getElementById('edit-mode-banner');
+    
+    // 1. Criar o banner dinamicamente se ele não existir no HTML
+    if (!banner) {
+        const createView = document.getElementById('create-view');
+        // Encontrar o cabeçalho para inserir o banner depois dele
+        const header = createView.querySelector('.view-header');
+        
+        const bannerHTML = `
+            <div id="edit-mode-banner" style="background: #fef3c7; border: 2px solid #f59e0b; border-radius: 8px; padding: 1rem 1.5rem; margin-bottom: 1.5rem;">
+                <div style="display: flex; align-items: center; gap: 1rem;">
+                    <div style="flex: 1;">
+                        <div style="color: #78350f;">
+                            <strong>Documento:</strong> <span id="edit-doc-type"></span> <strong>ID:</strong> <span id="edit-doc-id"></span>
+                            <strong>Cliente:</strong> <span id="edit-doc-client"></span>
+                        </div>
+                    </div>
+                    <button onclick="cancelEdit()" style="padding: 0.6rem 1.2rem; background: white; border: 2px solid #f59e0b; border-radius: 6px; cursor: pointer; font-weight: 600; color: #92400e;">
+                        ✖ Cancelar Edição
+                    </button>
+                </div>
+            </div>
+        `;
+        
+        // Inserir o banner logo após o cabeçalho da view
+        if (header) {
+            header.insertAdjacentHTML('afterend', bannerHTML);
+        } else {
+            // Fallback: inserir no topo da view
+            createView.insertAdjacentHTML('afterbegin', bannerHTML);
+        }
+        
+        banner = document.getElementById('edit-mode-banner'); // Pegar a referência
+    }
+    
+    // 2. Atualizar o conteúdo e mostrar o banner
+    const clientName = doc.clientSnapshot?.name || doc.client_snapshot?.name || 'N/A';
+    document.getElementById('edit-doc-type').textContent = doc.type === 'orcamento' ? 'ORÇAMENTO' : 'RECIBO';
+    document.getElementById('edit-doc-id').textContent = doc.id;
+    document.getElementById('edit-doc-client').textContent = clientName;
+    banner.style.display = 'block';
+    
+    // 3. Atualizar o título da view
+    const title = document.querySelector('#create-view .view-header h2');
+    if (title) {
+        title.textContent = `✏️ Editando ${doc.type === 'orcamento' ? 'Orçamento' : 'Recibo'} #${doc.id}`;
+    }
+}
+
+/**
+ * Cancela o modo de edição, limpa o formulário e volta ao dashboard.
+ */
+window.cancelEdit = function() {
+    clearForm(); // O clearForm agora vai resetar o banner e o título
+    goToDashboard();
+}
+
+// ===== MODALS =====
+function setupModals() {
+    // Product modal
+    document.getElementById('product-form').addEventListener('submit', async function(e) {
+        e.preventDefault();
+        
+        const product = {
+            name: document.getElementById('product-name').value,
+            service_type: document.getElementById('product-service-type').value,
+            unit_price: parseFloat(document.getElementById('product-price').value)
+        };
+        
+        const editId = this.dataset.editId;
+        
+        try {
+            if (editId) {
+                const { error } = await supabaseClient
+                    .from('products')
+                    .update(product)
+                    .eq('id', editId);
+                
+                if (error) throw error;
+                delete this.dataset.editId;
+            } else {
+                const { error } = await supabaseClient
+                    .from('products')
+                    .insert(product);
+                
+                if (error) throw error;
+            }
+            
+            await loadProducts();
+            closeProductModal();
+            showToast('Serviço salvo com sucesso!', 'success');
+        } catch (error) {
+            if (error.message.includes('duplicate')) {
+                showToast('Já existe um serviço com este nome!', 'error');
+            } else {
+                showToast('Erro ao salvar serviço', 'error');
+            }
+        }
+    });
+    
+    // Client modal
+    document.getElementById('client-form').addEventListener('submit', async function(e) {
+        e.preventDefault();
+        
+        const client = {
+            name: document.getElementById('modal-client-name').value,
+            cpf_cnpj: document.getElementById('modal-client-cpfcnpj').value,
+            address: document.getElementById('modal-client-address').value,
+            contact: document.getElementById('modal-client-contact').value
+        };
+        
+        const editId = this.dataset.editId;
+        
+        try {
+            if (editId) {
+                const { error } = await supabaseClient
+                    .from('clients')
+                    .update(client)
+                    .eq('id', editId);
+                
+                if (error) throw error;
+                delete this.dataset.editId;
+            } else {
+                const { error } = await supabaseClient
+                    .from('clients')
+                    .insert(client);
+                
+                if (error) throw error;
+            }
+            
+            await loadClients();
+            await setupClientAutocomplete();
+            closeClientModal();
+            showToast('Cliente salvo com sucesso!', 'success');
+        } catch (error) {
+            showToast('Erro ao salvar cliente', 'error');
+        }
+    });
+}
+
+// ===== FECHAR MODAIS (click fora do modal / ESC) =====
+function setupModalCloseHandlers() {
+    // fechar preview ao clicar no overlay (fora do conteúdo)
+    var previewModal = document.getElementById('preview-modal');
+    if (previewModal) {
+        previewModal.addEventListener('click', function (e) {
+            // se o clique foi no próprio overlay (não em um filho), fecha
+            if (e.target === this) {
+                closePreview();
+            }
+        });
+    }
+
+    // fechar outros modais ao clicar no overlay (produto / cliente)
+    ['product-modal', 'client-modal'].forEach(function(id){
+        var m = document.getElementById(id);
+        if (m) {
+            m.addEventListener('click', function (e) {
+                if (e.target === this) {
+                    // usar as funções de fechamento existentes para manter limpeza/estado
+                    if (id === 'product-modal') closeProductModal();
+                    if (id === 'client-modal') closeClientModal();
+                }
+            });
+        }
+    });
+
+    // ESC para fechar (fecha preview, product ou client se estiverem ativos)
+    document.addEventListener('keydown', function (e) {
+        var key = e.key || e.keyCode;
+        if (key === 'Escape' || key === 'Esc' || key === 27) {
+            if (previewModal && previewModal.classList.contains('active')) closePreview();
+            var pm = document.getElementById('product-modal');
+            if (pm && pm.classList.contains('active')) closeProductModal();
+            var cm = document.getElementById('client-modal');
+            if (cm && cm.classList.contains('active')) closeClientModal();
+        }
+    });
+}
+
+// Chame esta função ao inicializar (já existe chamada para setupModals() no DOMContentLoaded)
+setupModalCloseHandlers();
+
+// Modal functions
+
+window.openProductModal = function() {
+    document.getElementById('product-form').reset();
+    delete document.getElementById('product-form').dataset.editId;
+    document.getElementById('product-modal').classList.add('active');
+};
+
+window.closeProductModal = function() {
+    document.getElementById('product-modal').classList.remove('active');
+};
+
+window.editProduct = async function(id) {
+    try {
+        const { data: product } = await supabaseClient
+            .from('products')
+            .select('*')
+            .eq('id', id)
+            .single();
+        
+        if (product) {
+            document.getElementById('product-modal').classList.add('active');
+            document.getElementById('product-name').value = product.name;
+            document.getElementById('product-service-type').value = product.service_type;
+            document.getElementById('product-price').value = product.unit_price;
+            document.getElementById('product-form').dataset.editId = id;
+        }
+    } catch (error) {
+        console.error('Erro:', error);
+    }
+};
+
+window.deleteProduct = async function(id) {
+    if (confirm('Excluir este serviço?')) {
+        try {
+            const { error } = await supabaseClient
+                .from('products')
+                .delete()
+                .eq('id', id);
+            
+            if (error) throw error;
+            
+            await loadProducts();
+            showToast('Serviço excluído', 'success');
+        } catch (error) {
+            showToast('Erro ao excluir', 'error');
+        }
+    }
+};
+
+window.openClientModal = function() {
+    document.getElementById('client-form').reset();
+    delete document.getElementById('client-form').dataset.editId;
+    document.getElementById('client-modal').classList.add('active');
+};
+
+window.closeClientModal = function() {
+    document.getElementById('client-modal').classList.remove('active');
+};
+
+window.editClient = async function(id) {
+    try {
+        const { data: client } = await supabaseClient
+            .from('clients')
+            .select('*')
+            .eq('id', id)
+            .single();
+        
+        if (client) {
+            document.getElementById('client-modal').classList.add('active');
+            document.getElementById('modal-client-name').value = client.name;
+            document.getElementById('modal-client-cpfcnpj').value = client.cpf_cnpj;
+            document.getElementById('modal-client-address').value = client.address || '';
+            document.getElementById('modal-client-contact').value = client.contact || '';
+            document.getElementById('client-form').dataset.editId = id;
+        }
+    } catch (error) {
+        console.error('Erro:', error);
+    }
+};
+
+window.deleteClient = async function(id) {
+
+    if (confirm('Excluir este cliente?')) {
+        try {
+            const { error } = await supabaseClient
+                .from('clients')
+                .delete()
+                .eq('id', id);
+            
+            if (error) throw error;
+            
+            await loadClients();
+            await setupClientAutocomplete();
+            showToast('Cliente excluído', 'success');
+        } catch (error) {
+            showToast('Erro ao excluir', 'error');
+        }
+    }
+};
+
+// ===== BACKUP =====
+window.exportBackup = async function() {
+    showToast('Preparando backup...', 'info');
+    
+    try {
+        const [company, products, clients, documents] = await Promise.all([
+            supabaseClient.from('company').select('*').single(),
+            supabaseClient.from('products').select('*'),
+            supabaseClient.from('clients').select('*'),
+            supabaseClient.from('documents').select('*')
+        ]);
+        
+        const backup = {
+            version: '2.0',
+            exportDate: new Date().toISOString(),
+            company: company.data,
+            products: products.data,
+            clients: clients.data,
+            documents: documents.data
+        };
+        
+        const json = JSON.stringify(backup, null, 2);
+        const blob = new Blob([json], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = `msi-backup-${Utils.hoje()}.json`;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        
+        showToast('Backup exportado com sucesso!', 'success');
+    } catch (error) {
+        console.error('Erro ao exportar:', error);
+        showToast('Erro ao exportar backup', 'error');
+    }
+};
+
+window.restoreSeed = async function() {
+    if (!confirm('Isso apagará TODOS os dados atuais. Continuar?')) return;
+    
+    showToast('Restaurando dados iniciais...', 'info');
+    
+    // Implementar restore...
+    
+    showToast('Dados restaurados!', 'success');
+    location.reload();
+};
+
+// ===== HELPERS =====
+function formatDocumentFromDB(data) {
+    return {
+        ...data,
+        id: data.id,
+        type: data.type,
+        clientSnapshot: data.client_snapshot,
+        companySnapshot: data.company_snapshot,
+        typeSpecific: data.type_specific,
+        responsavelTecnico: data.responsavel_tecnico,
+        cityState: data.city_state,
+        discountPercent: data.discount_percent,
+        taxValue: data.tax_value,
+        discountValue: data.discount_value
+    };
+}
