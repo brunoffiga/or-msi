@@ -242,9 +242,9 @@ button {
 
 .stat-header {
     display: flex;
-    justify-content: space-between;
+    justify-content: flex-start;
     align-items: flex-start;
-    gap: 1rem;
+    gap: 0.4rem;
 }
 
 .stat-icon {
@@ -270,12 +270,6 @@ button {
     letter-spacing: 0.08em;
     text-transform: uppercase;
     color: var(--secondary);
-}
-
-.stat-count {
-    font-size: 0.85rem;
-    color: var(--secondary);
-    white-space: nowrap;
 }
 
 /* ========== FILTROS ========== */
