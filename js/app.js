@@ -227,22 +227,25 @@ async function loadDashboard(filters = {}) {
 
         const orcamentos = filteredDocs.filter(d => d.type === 'orcamento');
         const recibos = filteredDocs.filter(d => d.type === 'recibo');
+        const recebidos = filteredDocs.filter(d => d.type === 'recibo' && d.status === 'Pago');
 
         const orcamentosValue = orcamentos.reduce((sum, doc) => sum + (parseFloat(doc.total) || 0), 0);
         const recibosValue = recibos.reduce((sum, doc) => sum + (parseFloat(doc.total) || 0), 0);
-        const totalValue = orcamentosValue + recibosValue;
+        const totalRecebidoValue = recebidos.reduce((sum, doc) => sum + (parseFloat(doc.total) || 0), 0);
 
         const setText = (id, value) => {
             const el = document.getElementById(id);
             if (el) el.textContent = value;
         };
 
-        setText('stat-orcamentos-count', `${orcamentos.length} documento${orcamentos.length !== 1 ? 's' : ''}`);
+        setText('stat-orcamentos-count', orcamentos.length);
         setText('stat-orcamentos-value', Utils.formatMoney(orcamentosValue));
-        setText('stat-recibos-count', `${recibos.length} documento${recibos.length !== 1 ? 's' : ''}`);
+
+        setText('stat-recibos-count', recibos.length);
         setText('stat-recibos-value', Utils.formatMoney(recibosValue));
-        setText('stat-total-count', `${filteredDocs.length} documento${filteredDocs.length !== 1 ? 's' : ''}`);
-        setText('stat-total-value', Utils.formatMoney(totalValue));
+
+        setText('stat-total-count', recebidos.length);
+        setText('stat-total-value', Utils.formatMoney(totalRecebidoValue));
 
         renderDocumentsTable(filteredDocs);
     } catch (error) {
