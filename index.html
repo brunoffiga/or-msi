@@ -79,59 +79,11 @@
                 opacity: 1;
             }
         }
-        
-        /* Loading spinner */
-        .loading-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: rgba(255,255,255,0.95);
-            display: none;
-            align-items: center;
-            justify-content: center;
-            z-index: 9998;
-        }
-        
-        .loading-overlay.active {
-            display: flex;
-        }
-        
-        .loading-content {
-            text-align: center;
-        }
-        
-        .loading-spinner {
-            width: 50px;
-            height: 50px;
-            border: 5px solid rgba(0,0,0,.1);
-            border-radius: 50%;
-            border-top-color: #2563eb;
-            animation: spin 0.8s ease infinite;
-            margin: 0 auto 20px;
-        }
-        
-        @keyframes spin {
-            to { transform: rotate(360deg); }
-        }
-        
-        .loading-text {
-            color: #64748b;
-            font-size: 1.1rem;
-        }
     </style>
 </head>
 <body>
     <!-- Container de Notificações -->
     <div class="toast-container" id="toast-container"></div>
-    
-    <!-- Loading Overlay -->
-    <div class="loading-overlay" id="loading-overlay">
-        <div class="loading-content">
-            <div class="loading-spinner"></div>
-            <div class="loading-text">Processando...</div>
-        </div>
     </div>
 
     <header class="app-header">
@@ -142,10 +94,10 @@
                 </a>
             </div>
             <nav class="main-nav">
-                <button class="nav-btn" data-view="create">➕ Documento</button>
-                <button class="nav-btn" data-view="products">🛠️ Serviços</button>
-                <button class="nav-btn" data-view="clients">🏢 Clientes</button>
-                <button class="nav-btn" data-view="settings">⚙️</button>
+                <button class="nav-btn" data-view="create">Documentos</button>
+                <button class="nav-btn" data-view="products">Serviços</button>
+                <button class="nav-btn" data-view="clients">Clientes</button>
+                <button class="nav-btn" data-view="settings">Configurações</button>
             </nav>
         </div>
     </header>
@@ -154,40 +106,33 @@
         
         <section id="dashboard-view" class="view-section active">
             <div class="view-header">
-                <h2>📊 Dashboard</h2>
+                <h2>Dashboard</h2>
                 <div class="header-actions">
-                    <button class="btn-export" onclick="exportBackup()">💾</button>
+                    <button class="btn-export" onclick="exportBackup()">Exportar backup</button>
                 </div>
             </div>
 
-            <div class="stats-grid">
-                <div class="stat-card">
-                    <div class="stat-icon">📄</div>
-                    <div class="stat-content">
-                        <span class="stat-value" id="stat-total">0</span>
-                        <span class="stat-label">Total Documentos</span>
-                    </div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-icon">📋</div>
-                    <div class="stat-content">
-                        <span class="stat-value" id="stat-orcamentos">0</span>
+            <div class="stats-grid stats-grid-kpis">
+                <div class="stat-card stat-card-kpi">
+                    <div class="stat-header">
                         <span class="stat-label">Orçamentos</span>
+                        <span class="stat-count" id="stat-orcamentos-count">0 documentos</span>
                     </div>
+                    <div class="stat-value" id="stat-orcamentos-value">R$ 0,00</div>
                 </div>
-                <div class="stat-card">
-                    <div class="stat-icon">🧾</div>
-                    <div class="stat-content">
-                        <span class="stat-value" id="stat-recibos">0</span>
+                <div class="stat-card stat-card-kpi">
+                    <div class="stat-header">
                         <span class="stat-label">Recibos</span>
+                        <span class="stat-count" id="stat-recibos-count">0 documentos</span>
                     </div>
+                    <div class="stat-value" id="stat-recibos-value">R$ 0,00</div>
                 </div>
-                <div class="stat-card">
-                    <div class="stat-icon">💰</div>
-                    <div class="stat-content">
-                        <span class="stat-value" id="stat-total-value">R$ 0,00</span>
-                        <span class="stat-label">Valor Total</span>
+                <div class="stat-card stat-card-kpi">
+                    <div class="stat-header">
+                        <span class="stat-label">Total</span>
+                        <span class="stat-count" id="stat-total-count">0 documentos</span>
                     </div>
+                    <div class="stat-value" id="stat-total-value">R$ 0,00</div>
                 </div>
             </div>
 
@@ -225,7 +170,7 @@
                     <label>Buscar:</label>
                     <input type="text" id="filter-search" placeholder="Cliente, ID...">
                 </div>
-                <button class="btn-secondary" onclick="clearFilters()">🔄 Limpar</button>
+                <button class="btn-secondary" onclick="clearFilters()">Limpar</button>
             </div>
 
             <div class="documents-table-container">
@@ -249,7 +194,7 @@
 
         <section id="create-view" class="view-section">
             <div class="view-header">
-                <h2>➕ Novo Documento</h2>
+                <h2>Novo Documento</h2>
             </div>
 
             <form id="document-form" class="document-form">
@@ -262,11 +207,11 @@
                             <div class="radio-group">
                                 <label class="radio-label">
                                     <input type="radio" name="documentType" value="orcamento" checked>
-                                    <span>📋 Orçamento</span>
+                                    <span>Orçamento</span>
                                 </label>
                                 <label class="radio-label">
                                     <input type="radio" name="documentType" value="recibo">
-                                    <span>🧾 Recibo</span>
+                                    <span>Recibo</span>
                                 </label>
                             </div>
                         </div>
@@ -302,7 +247,7 @@
                     <h3>Itens</h3>
                     <div id="items-container">
                     </div>
-                    <button type="button" class="btn-secondary" onclick="addItemRow()">➕ Adicionar Item</button>
+                    <button type="button" class="btn-secondary" onclick="addItemRow()">Adicionar item</button>
                 </div>
 
                 <div class="form-section">
@@ -392,8 +337,8 @@
                 </div>
 
                 <div class="form-actions">
-                    <button type="button" class="btn-secondary" onclick="previewDocument()">👁️ Visualizar</button>
-                    <button type="submit" class="btn-primary">💾 Salvar Documento</button>
+                    <button type="button" class="btn-secondary" onclick="previewDocument()">Visualizar</button>
+                    <button type="submit" class="btn-primary">Exportar backup Salvar Documento</button>
                 </div>
             </form>
         </section>
@@ -401,7 +346,7 @@
         <section id="products-view" class="view-section">
             <div class="view-header">
                 <h2>Catálogo de Serviços</h2>
-                <button class="btn-primary" onclick="openProductModal()">➕ Novo Serviço</button>
+                <button class="btn-primary" onclick="openProductModal()">Novo serviço</button>
             </div>
             <div class="products-grid" id="products-grid">
             </div>
@@ -410,7 +355,7 @@
         <section id="clients-view" class="view-section">
             <div class="view-header">
                 <h2>Cadastro de Clientes</h2>
-                <button class="btn-primary" onclick="openClientModal()">➕ Novo Cliente</button>
+                <button class="btn-primary" onclick="openClientModal()">Novo cliente</button>
             </div>
             <div class="clients-grid" id="clients-grid">
             </div>
@@ -455,7 +400,7 @@
                     </div>
                 </div>
                 <div class="form-actions">
-                    <button type="submit" class="btn-primary">💾 Salvar</button>
+                    <button type="submit" class="btn-primary">Exportar backup Salvar</button>
                 </div>
             </form>
         </section>
@@ -465,15 +410,15 @@
     <div id="preview-modal" class="modal">
         <div class="modal-content large">
             <div class="modal-header">
-                <h3>👁️ Visualização do Documento</h3>
+                <h3>Visualização do documento</h3>
                 <button class="modal-close" onclick="closePreview()">&times;</button>
             </div>
             <div class="modal-body">
                 <div id="preview-content"></div>
             </div>
             <div class="modal-footer">
-                <button class="btn-secondary" onclick="exportPDF()">📄 PDF</button>
-                <button class="btn-secondary" onclick="exportDOCX()">📝 DOCX</button>
+                <button class="btn-secondary" onclick="exportPDF()">Exportar PDF</button>
+                <button class="btn-secondary" onclick="exportDOCX()">Exportar DOCX</button>
             </div>
         </div>
     </div>
@@ -481,7 +426,7 @@
     <div id="product-modal" class="modal">
         <div class="modal-content">
             <div class="modal-header">
-                <h3>➕ Novo Serviço/Produto</h3>
+                <h3>Novo serviço</h3>
                 <button class="modal-close" onclick="closeProductModal()">&times;</button>
             </div>
             <form id="product-form">
@@ -514,7 +459,7 @@
     <div id="client-modal" class="modal">
         <div class="modal-content">
             <div class="modal-header">
-                <h3>➕ Novo Cliente</h3>
+                <h3>Novo cliente</h3>
                 <button class="modal-close" onclick="closeClientModal()">&times;</button>
             </div>
             <form id="client-form">
